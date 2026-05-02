@@ -49,4 +49,4 @@ Topic clusters are generated with KMeans over TF-IDF vectors. Each cluster is su
 
 ## GitHub Link
 
-Create an empty GitHub repository, add it as `origin`, push the local `main` branch, and replace this line with the final repository URL before submission.
+https://github.com/walterbishop67/data_mining_hw2.git
