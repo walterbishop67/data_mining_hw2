@@ -13,6 +13,12 @@ It recommends the top 5 journals for a new computer science article abstract and
 - Readable report copy in `report/ieee_report.md`.
 - Full-dataset validation results: 23,061 articles, 455 journals, and 80 subject areas.
 
+## Data Files
+
+- `CS_JournalAbstracts/CompSciencePub.bak` is the original SQL Server backup provided with the assignment. It is kept as raw source material and ignored by Git because it is large.
+- `CompSciencePub.sqlite` is the converted SQLite database used by the Python code, notebook, tests, and Streamlit app.
+- The project does not read the `.bak` file directly; restoring/exporting it to SQLite is required if `CompSciencePub.sqlite` is missing.
+
 ## Submission Checklist
 
 - Source code with GitHub link: included in `src/`, `app.py`, and the GitHub section below.

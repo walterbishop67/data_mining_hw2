@@ -14,12 +14,19 @@ except ImportError:  # Allows running modules directly from the project root.
 
 
 DEFAULT_DB_PATH = Path(__file__).resolve().parents[1] / "CompSciencePub.sqlite"
+RAW_BACKUP_PATH = Path(__file__).resolve().parents[1] / "CS_JournalAbstracts" / "CompSciencePub.bak"
 
 
 def load_dataset(db_path: str | Path = DEFAULT_DB_PATH, limit: int | None = None) -> pd.DataFrame:
     """Load article, abstract, journal, keyword, and subject fields."""
     db_path = Path(db_path)
     if not db_path.exists():
+        if db_path == DEFAULT_DB_PATH and RAW_BACKUP_PATH.exists():
+            raise FileNotFoundError(
+                f"SQLite database not found: {db_path}. "
+                f"The raw SQL Server backup exists at {RAW_BACKUP_PATH}, "
+                "but it must be restored/exported to CompSciencePub.sqlite before this project can load it."
+            )
         raise FileNotFoundError(f"SQLite database not found: {db_path}")
 
     limit_clause = f"LIMIT {int(limit)}" if limit else ""
