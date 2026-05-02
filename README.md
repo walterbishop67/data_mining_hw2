@@ -33,6 +33,14 @@ jupyter notebook notebooks/journal_finder_project.ipynb
 
 The notebook has been executed once and includes saved outputs for dataset summary, TF-IDF training, journal recommendation, and topic clustering.
 
+## Run Tests
+
+```powershell
+python -m unittest discover -s tests -v
+```
+
+The tests validate text cleaning, SQLite loading, dataset summary counts, TF-IDF training, top-5 journal recommendation, short abstract validation, and topic clustering.
+
 ## Method
 
 The project uses the provided `CompSciencePub.sqlite` database. Article title, abstract, author keywords, Web of Science Keyword Plus, and subject fields are cleaned and combined into one training text. A TF-IDF vectorizer converts articles and user abstracts into vectors. Cosine similarity finds the closest known articles, and scores are aggregated by journal to produce the final journal ranking.

@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 
+import os
+
 import pandas as pd
 from sklearn.cluster import KMeans
 from sklearn.feature_extraction.text import TfidfVectorizer
+
+os.environ.setdefault("LOKY_MAX_CPU_COUNT", "1")
 
 
 def train_vectorizer(texts: pd.Series):
