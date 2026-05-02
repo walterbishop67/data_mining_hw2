@@ -1,5 +1,7 @@
 # Journal Finder for Computer Science Articles
 
+This file is a readable copy of the project report. The IEEE conference source version is available in `report/ieee_report.tex`.
+
 ## Abstract
 
 Selecting a suitable journal is a common challenge for researchers because journal scope, subject area, and article terminology must align. This project builds a journal finder for computer science articles using a publication database containing abstracts, journals, keywords, and subject categories. The system recommends the five most relevant journals for a new article abstract and generates topic clusters for the corpus.
@@ -14,7 +16,11 @@ Journal articles are one of the most important research outputs. For authors, ch
 
 ## II. Related Work
 
-Text mining is widely used in document retrieval, topic discovery, and recommendation systems. Vector space models such as TF-IDF represent documents by term importance and support efficient similarity matching. Cosine similarity is a standard method for ranking documents by semantic and lexical overlap in sparse vector spaces. Clustering methods such as KMeans are also commonly used to discover groups of similar documents and summarize large text collections by topic.
+Text mining is widely used in document retrieval, topic discovery, and recommendation systems. Vector space models such as TF-IDF represent documents by term importance and support efficient similarity matching. Salton and Buckley showed that term weighting is a practical foundation for information retrieval because it balances term frequency with collection-level rarity. In this project, the same idea is used to represent each article as a weighted vector.
+
+Cosine similarity is a standard method for ranking documents by semantic and lexical overlap in sparse vector spaces. It is especially suitable for TF-IDF because the angle between vectors compares term distribution while reducing the effect of document length. For journal recommendation, this makes it possible to compare a new abstract against thousands of existing article records.
+
+Clustering methods are also commonly used to discover groups of similar documents and summarize large text collections by topic. KMeans is a simple and interpretable baseline for partitioning vectorized text into topical groups. Sebastiani's survey of text categorization also supports the use of machine learning methods for organizing and classifying textual documents. These studies motivate the use of TF-IDF, cosine similarity, and KMeans as transparent data mining methods for the assignment.
 
 ## III. Dataset
 
@@ -43,13 +49,13 @@ The implementation is organized as reusable Python modules under `src/`, a Jupyt
 
 The final dataset used by the system contains 23,061 articles with abstracts, 455 journals, and 80 distinct subject areas. The TF-IDF representation contains 40,000 features after applying document frequency thresholds and English stop-word filtering.
 
-For a sample abstract about machine learning methods for software defect prediction, the system returned five relevant journals:
+For a sample abstract about machine learning methods for software defect prediction, the full-dataset system returned five relevant journals:
 
-1. IEEE SOFTWARE
-2. JOURNAL OF SYSTEMS AND SOFTWARE
+1. JOURNAL OF WEB ENGINEERING
+2. AUTOMATED SOFTWARE ENGINEERING
 3. IEEE TRANSACTIONS ON SOFTWARE ENGINEERING
-4. AUTOMATED SOFTWARE ENGINEERING
-5. EMPIRICAL SOFTWARE ENGINEERING
+4. EMPIRICAL SOFTWARE ENGINEERING
+5. SOFTWARE QUALITY JOURNAL
 
 The topic clustering stage generated interpretable clusters with representative terms such as software, artificial intelligence, theory and methods, architecture, hardware, cloud computing, telecommunications, networks, and wireless systems.
 

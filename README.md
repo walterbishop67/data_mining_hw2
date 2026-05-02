@@ -1,15 +1,26 @@
 # Computer Science Journal Finder
 
 This project implements the data mining final project described in `Data_mining_journal_homework 2.pdf`.
-It recommends the top journals for a new computer science article abstract and generates topic clusters from the provided publication database.
+It recommends the top 5 journals for a new computer science article abstract and generates topic clusters from the provided publication database.
 
 ## Project Outputs
 
 - Source code for data loading, preprocessing, modeling, and recommendation.
 - Jupyter Notebook workflow in `notebooks/journal_finder_project.ipynb`.
 - Streamlit software interface in `app.py`.
-- IEEE-style report draft in `report/ieee_report.md`.
+- IEEE conference report in `report/ieee_report.docx`.
+- IEEE conference report source in `report/ieee_report.tex`.
+- Readable report copy in `report/ieee_report.md`.
 - Full-dataset validation results: 23,061 articles, 455 journals, and 80 subject areas.
+
+## Submission Checklist
+
+- Source code with GitHub link: included in `src/`, `app.py`, and the GitHub section below.
+- Jupyter Notebook format: included as `notebooks/journal_finder_project.ipynb` with saved outputs.
+- IEEE Conference report with literature review: included as `report/ieee_report.docx` and `report/ieee_report.tex`.
+- Journal finder software tailored to computer science subject areas: implemented in the Streamlit app and reusable modules.
+- Top-5 journal list from an entered article abstract: implemented by `recommend_journals(..., top_n=5)`.
+- Topic clusters for subject areas: implemented by `cluster_topics`.
 
 ## Setup
 
