@@ -11,7 +11,7 @@ It recommends the top 5 journals for a new computer science article abstract and
 - IEEE conference report in `report/ieee_report.docx`.
 - IEEE conference report source in `report/ieee_report.tex`.
 - Readable report copy in `report/ieee_report.md`.
-- Full-dataset validation results: 23,061 articles, 455 journals, and 80 subject areas.
+- Full-dataset validation results: 23,061 usable article abstracts, 455 journals, and 80 subject areas.
 
 ## Data Files
 
@@ -56,11 +56,11 @@ The notebook has been executed once and includes saved outputs for dataset summa
 python -m unittest discover -s tests -v
 ```
 
-The tests validate text cleaning, SQLite loading, dataset summary counts, TF-IDF training, top-5 journal recommendation, short abstract validation, and topic clustering.
+The tests validate text cleaning, SQLite loading, dataset summary counts, TF-IDF training, top-5 journal recommendation, empty abstract validation, and topic clustering.
 
 ## Method
 
-The project uses the provided `CompSciencePub.sqlite` database. Article title, abstract, author keywords, Web of Science Keyword Plus, and subject fields are cleaned and combined into one training text. A TF-IDF vectorizer converts articles and user abstracts into vectors. Cosine similarity finds the closest known articles, and scores are aggregated by journal to produce the final journal ranking.
+The project uses the provided `CompSciencePub.sqlite` database. Article title, abstract, author keywords, Web of Science Keyword Plus, and subject fields are cleaned and combined into one training text. Title, author keyword, and subject fields are intentionally weighted more strongly because they identify the article scope and improve journal matching. A TF-IDF vectorizer with up to 80,000 unigram/bigram features converts articles and user abstracts into vectors. Cosine similarity finds the closest known articles, and scores are aggregated by journal to produce the final top-5 ranking.
 
 Topic clusters are generated with KMeans over TF-IDF vectors. Each cluster is summarized with high-weight terms, dominant Web of Science subjects, and sample journals.
 

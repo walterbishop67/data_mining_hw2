@@ -16,9 +16,9 @@ def train_vectorizer(texts: pd.Series):
     vectorizer = TfidfVectorizer(
         stop_words="english",
         ngram_range=(1, 2),
-        min_df=2,
-        max_df=0.85,
-        max_features=40000,
+        min_df=1,
+        max_df=0.9,
+        max_features=80000,
         sublinear_tf=True,
         norm="l2",
     )

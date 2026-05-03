@@ -35,9 +35,9 @@ The provided SQLite database contains publication records from computer science 
 
 ## IV. Methodology
 
-The preprocessing step removes HTML tags from abstracts, normalizes whitespace, lowercases text, and combines title, abstract, keywords, keyword plus terms, and subjects into one training document for each article.
+The preprocessing step removes HTML tags from abstracts, normalizes whitespace, lowercases text, and combines title, abstract, keywords, keyword plus terms, and subjects into one training document for each article. Title, author keyword, and subject fields are repeated in the final training text to give more weight to article scope and Web of Science subject signals.
 
-For journal recommendation, the system fits a TF-IDF vectorizer on all article training documents. When a user enters a new abstract, the abstract is cleaned and transformed with the same vectorizer. Cosine similarity is calculated between the input abstract and known articles. The most similar articles are grouped by journal, and journal scores are calculated from the best and average similarity values. The final output is the top five journals.
+For journal recommendation, the system fits a TF-IDF vectorizer on all article training documents. The vectorizer uses English stop-word filtering, unigram and bigram features, sublinear term frequency, L2 normalization, and up to 80,000 features. When a user enters a new abstract, the abstract is cleaned and transformed with the same vectorizer. Cosine similarity is calculated between the input abstract and known articles. The most similar articles are grouped by journal, and journal scores are calculated from best similarity, average similarity, and the number of matched articles from the same journal. The final output is the top five journals.
 
 For topic discovery, the same TF-IDF representation is clustered using KMeans. Each cluster is summarized by top centroid terms, dominant subject categories, and sample journals.
 
@@ -47,15 +47,15 @@ The implementation is organized as reusable Python modules under `src/`, a Jupyt
 
 ## VI. Results and Evaluation
 
-The final dataset used by the system contains 23,061 articles with abstracts, 455 journals, and 80 distinct subject areas. The TF-IDF representation contains 40,000 features after applying document frequency thresholds and English stop-word filtering.
+The final dataset used by the system contains 23,061 articles with usable abstracts, 455 journals, and 80 distinct subject areas. The TF-IDF representation contains 80,000 features after applying English stop-word filtering and document frequency controls.
 
 For a sample abstract about machine learning methods for software defect prediction, the full-dataset system returned five relevant journals:
 
-1. JOURNAL OF WEB ENGINEERING
+1. EMPIRICAL SOFTWARE ENGINEERING
 2. AUTOMATED SOFTWARE ENGINEERING
 3. IEEE TRANSACTIONS ON SOFTWARE ENGINEERING
-4. EMPIRICAL SOFTWARE ENGINEERING
-5. SOFTWARE QUALITY JOURNAL
+4. SOFTWARE QUALITY JOURNAL
+5. SOFTWARE TESTING VERIFICATION & RELIABILITY
 
 The topic clustering stage generated interpretable clusters with representative terms such as software, artificial intelligence, theory and methods, architecture, hardware, cloud computing, telecommunications, networks, and wireless systems.
 
@@ -63,7 +63,7 @@ The project is evaluated with functional checks:
 
 - Database loading returns article records with journals and abstracts.
 - Text preprocessing removes HTML tags and produces searchable plain text.
-- Recommendation returns five journals for a sufficiently long abstract.
+- Recommendation returns five journals for a non-empty abstract, matching the assignment requirement that the author enters an article abstract.
 - Scores are sorted in descending order.
 - Clustering produces topic groups with representative terms and subjects.
 - The Jupyter Notebook executes from start to finish and stores output cells.

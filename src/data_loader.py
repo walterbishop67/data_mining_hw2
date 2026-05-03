@@ -110,11 +110,17 @@ def build_training_text(frame: pd.DataFrame) -> pd.DataFrame:
     df["training_text"] = (
         df["clean_title"]
         + " "
+        + df["clean_title"]
+        + " "
         + df["clean_abstract"]
         + " "
         + df["clean_author_keywords"]
         + " "
+        + df["clean_author_keywords"]
+        + " "
         + df["clean_keyword_plus"]
+        + " "
+        + df["clean_subjects"]
         + " "
         + df["clean_subjects"]
     ).str.replace(r"\s+", " ", regex=True).str.strip()

@@ -4,3 +4,9 @@ __pycache__/
 .streamlit/
 *.log
 CS_JournalAbstracts/*.bak
+exports/journal_articles_export.csv
+exports/pdf_streams_debug.txt
+exports/homework_pdf_extracted_rough.txt
+exports/jupyter_config/
+exports/jupyter_data/
+exports/jupyter_runtime/

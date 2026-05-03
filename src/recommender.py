@@ -18,12 +18,12 @@ def recommend_journals(
     vectorizer,
     matrix,
     top_n: int = 5,
-    neighbor_count: int = 150,
+    neighbor_count: int = 250,
 ) -> pd.DataFrame:
     """Rank journals by similarity between input abstract and known articles."""
     cleaned = clean_text(input_abstract)
-    if len(cleaned.split()) < 20:
-        raise ValueError("Please enter a longer abstract with at least 20 words.")
+    if not cleaned:
+        raise ValueError("Please enter an article abstract.")
 
     query_vector = vectorizer.transform([cleaned])
     similarities = cosine_similarity(query_vector, matrix).ravel()
@@ -46,7 +46,15 @@ def recommend_journals(
         )
         .reset_index()
     )
-    journal_scores["score"] = (0.75 * journal_scores["best_score"]) + (0.25 * journal_scores["score"])
+    max_matches = max(float(journal_scores["matched_articles"].max()), 1.0)
+    evidence_score = (
+        np.log1p(journal_scores["matched_articles"]) / np.log1p(max_matches)
+    ) * journal_scores["best_score"]
+    journal_scores["score"] = (
+        (0.60 * journal_scores["best_score"])
+        + (0.25 * journal_scores["score"])
+        + (0.15 * evidence_score)
+    )
 
     result = journal_scores.sort_values(
         ["score", "matched_articles"], ascending=[False, False]

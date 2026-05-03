@@ -68,9 +68,9 @@ class JournalFinderProjectTests(unittest.TestCase):
         self.assertTrue(result["score"].is_monotonic_decreasing)
         self.assertTrue(result["journal"].notna().all())
 
-    def test_recommend_journals_rejects_short_abstract(self):
+    def test_recommend_journals_rejects_empty_abstract(self):
         with self.assertRaises(ValueError):
-            recommend_journals("too short", self.frame, self.vectorizer, self.matrix)
+            recommend_journals("", self.frame, self.vectorizer, self.matrix)
 
     def test_topic_clustering_returns_requested_clusters(self):
         clusters = cluster_topics(self.frame, n_clusters=4)
