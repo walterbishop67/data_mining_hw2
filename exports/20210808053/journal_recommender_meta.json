@@ -1,0 +1,19 @@
+{
+  "n_articles": 22966,
+  "n_journals": 406,
+  "min_words_abstract": 20,
+  "min_samples_per_journal": 5,
+  "holdout_test_size": 0.2,
+  "holdout_random_state": 42,
+  "split_strategy": "stratified_train_test_split",
+  "saved_model_fit_scope": "train_split_only",
+  "train_n_samples": 18372,
+  "train_top1_accuracy": 0.999401262791204,
+  "train_top5_accuracy": 1.0,
+  "test_n_samples": 4594,
+  "holdout_top1_accuracy": 0.7061384414453635,
+  "holdout_top5_accuracy": 0.9323030039181541,
+  "classifier": "SGDClassifier(loss='log_loss', penalty='l2')",
+  "classifier_alpha": 3e-05,
+  "classifier_early_stopping": false
+}

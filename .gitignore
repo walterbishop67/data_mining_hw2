@@ -10,3 +10,6 @@ exports/homework_pdf_extracted_rough.txt
 exports/jupyter_config/
 exports/jupyter_data/
 exports/jupyter_runtime/
+exports/20210808053/*.csv
+exports/20210808053/*.pkl
+20210808053_DataMiningFinal_CLEAN/

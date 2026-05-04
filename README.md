@@ -1,32 +1,22 @@
 # Computer Science Journal Finder
 
-This project implements the data mining final project described in `Data_mining_journal_homework 2.pdf`.
-It recommends the top 5 journals for a new computer science article abstract and generates topic clusters from the provided publication database.
+Final data mining project for recommending computer science journals from an article abstract and showing topic clusters from the publication dataset.
 
-## Project Outputs
+GitHub repository: https://github.com/walterbishop67/data_mining_hw2.git
 
-- Source code for data loading, preprocessing, modeling, and recommendation.
-- Jupyter Notebook workflow in `notebooks/journal_finder_project.ipynb`.
-- Streamlit software interface in `app.py`.
-- IEEE conference report in `report/ieee_report.docx`.
-- IEEE conference report source in `report/ieee_report.tex`.
-- Readable report copy in `report/ieee_report.md`.
-- Full-dataset validation results: 23,061 usable article abstracts, 455 journals, and 80 subject areas.
+## Submission Contents
 
-## Data Files
-
-- `CS_JournalAbstracts/CompSciencePub.bak` is the original SQL Server backup provided with the assignment. It is kept as raw source material and ignored by Git because it is large.
-- `CompSciencePub.sqlite` is the converted SQLite database used by the Python code, notebook, tests, and Streamlit app.
-- The project does not read the `.bak` file directly; restoring/exporting it to SQLite is required if `CompSciencePub.sqlite` is missing.
-
-## Submission Checklist
-
-- Source code with GitHub link: included in `src/`, `app.py`, and the GitHub section below.
-- Jupyter Notebook format: included as `notebooks/journal_finder_project.ipynb` with saved outputs.
-- IEEE Conference report with literature review: included as `report/ieee_report.docx` and `report/ieee_report.tex`.
-- Journal finder software tailored to computer science subject areas: implemented in the Streamlit app and reusable modules.
-- Top-5 journal list from an entered article abstract: implemented by `recommend_journals(..., top_n=5)`.
-- Topic clusters for subject areas: implemented by `cluster_topics`.
+- `app.py` - Streamlit interface.
+- `main.py` - launcher for Streamlit and Jupyter Notebook.
+- `src/` - data loading, preprocessing, model, recommender, final-project, and dashboard modules.
+- `notebooks/20210808053_Final_Project.ipynb` - final notebook deliverable.
+- `report/20210808053_IEEE_PROJECT_REPORT.tex` - IEEE report source.
+- `report/20210808053_PROJE_DOKUMANTASYONU.md` - project documentation.
+- `CompSciencePub.sqlite` - converted SQLite database used by the code.
+- `exports/20210808053/journal_recommender_pipeline.pkl` - saved final journal recommender.
+- `exports/20210808053/journal_recommender_meta.json` - saved model metrics.
+- `exports/20210808053/step9_clustered_dataset.csv` - saved topic-clustering output.
+- `tests/` - verification tests.
 
 ## Setup
 
@@ -37,33 +27,48 @@ python -m pip install -r requirements.txt
 ## Run the App
 
 ```powershell
-streamlit run app.py
+python main.py
 ```
 
-Paste an article abstract into the text area and click `Find journals`. The app returns the top-5 journal recommendations and displays generated topic clusters.
+The app has two tabs:
 
-## Run the Notebook
+- Journal Recommender: enter an abstract and get the top 5 journal recommendations.
+- Topic Clusters: inspect the KMeans topic clusters and their dominant journals.
+
+To run the final notebook:
 
 ```powershell
-jupyter notebook notebooks/journal_finder_project.ipynb
+python main.py --jupyter
 ```
 
-The notebook has been executed once and includes saved outputs for dataset summary, TF-IDF training, journal recommendation, and topic clustering.
+To start both Streamlit and Jupyter:
 
-## Run Tests
+```powershell
+python main.py --both
+```
+
+## Rebuild Final Artifacts
+
+The large intermediate `step5_enriched_dataset.csv` is intentionally not kept in the clean submission folder. Regenerate it only when retraining is needed:
+
+```powershell
+python -m src.final_project.enrichment
+python -m src.final_project.training
+python -m src.final_project.topic_modeling
+```
+
+## Test
 
 ```powershell
 python -m unittest discover -s tests -v
 ```
 
-The tests validate text cleaning, SQLite loading, dataset summary counts, TF-IDF training, top-5 journal recommendation, empty abstract validation, and topic clustering.
+The tests verify SQLite loading, text preprocessing, baseline recommendation, saved final model loading, top-5 prediction, and saved topic-cluster loading.
 
 ## Method
 
-The project uses the provided `CompSciencePub.sqlite` database. Article title, abstract, author keywords, Web of Science Keyword Plus, and subject fields are cleaned and combined into one training text. Title, author keyword, and subject fields are intentionally weighted more strongly because they identify the article scope and improve journal matching. A TF-IDF vectorizer with up to 80,000 unigram/bigram features converts articles and user abstracts into vectors. Cosine similarity finds the closest known articles, and scores are aggregated by journal to produce the final top-5 ranking.
+The final recommender uses separate TF-IDF channels for title, abstract, keywords, and subjects, then trains an `SGDClassifier(loss="log_loss")` for multi-class journal prediction. The Streamlit app loads the saved pipeline and returns the five highest-probability journals.
 
-Topic clusters are generated with KMeans over TF-IDF vectors. Each cluster is summarized with high-weight terms, dominant Web of Science subjects, and sample journals.
+The current saved model is trained only on the stratified training split. The holdout test split is kept separate for evaluation and reaches `0.7061` Top-1 accuracy and `0.9323` Top-5 accuracy across 406 journal classes.
 
-## GitHub Link
-
-https://github.com/walterbishop67/data_mining_hw2.git
+Topic clusters are generated with TF-IDF and KMeans over enriched article text. The dashboard displays cluster names, representative terms, article counts, top journals, and sample records.

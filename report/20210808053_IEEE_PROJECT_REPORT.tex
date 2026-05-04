@@ -1,0 +1,169 @@
+﻿% =============================================================================
+% IEEE Conference Format -- Course Final Project Report
+% Compile with: pdflatex 20210808053_IEEE_PROJECT_REPORT.tex
+% =============================================================================
+
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{url}
+\usepackage{graphicx}
+\usepackage{booktabs}
+
+\begin{document}
+
+\title{Content-Based Journal Recommendation and Topic Clustering for Computer Science Articles}
+
+\author{
+\IEEEauthorblockN{Muharrem Kocabiyik}
+\IEEEauthorblockA{
+\textit{Department of Computer Engineering}\\
+Akdeniz University\\
+Course: Introduction to Data Mining -- Final Project\\
+Email: \texttt{20210808053@ogr.akdeniz.edu.tr}
+}
+}
+
+\maketitle
+
+\begin{abstract}
+Selecting an appropriate journal is an important step in disseminating computer science research. This project presents an end-to-end data mining pipeline for journal recommendation and topic clustering. The system builds an enriched article dataset from a relational publication database, evaluates baseline text representations, trains a multi-class journal recommendation model, and returns the top five candidate journals for a user-provided article abstract. Topic clusters are also generated to summarize major subject areas in the corpus. The final recommendation model uses multi-channel TF--IDF features and a linear classifier trained with logistic loss. On a stratified hold-out test set, the system achieves 0.7061 top-1 accuracy and 0.9323 top-5 accuracy across 406 journal classes.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Journal recommendation, text mining, TF--IDF, top-k ranking, topic clustering, k-means, scholarly data
+\end{IEEEkeywords}
+
+\section{Introduction}
+Authors often need to identify journals whose scope matches the content of a manuscript. This is difficult when many candidate journals share overlapping computer science topics. The goal of this project is to build a journal finder: when a user enters an article abstract, the system returns the five most relevant journals. The assignment also requires topic clusters for subject areas.
+
+The project is designed as a reproducible data mining workflow rather than a single black-box demo. It starts with simple TF--IDF similarity baselines, compares text representations, enriches article records with keywords and subject categories, trains a supervised final model, and performs unsupervised topic clustering.
+
+\section{Literature Review}
+Scholarly recommender systems use content, metadata, citations, user behavior, or hybrid signals to recommend papers, venues, reviewers, and research topics. In journal and venue recommendation, content-based features such as titles, abstracts, keywords, and subject categories are especially useful when user interaction data is unavailable~\cite{khadka2025,mumtaz2022}.
+
+TF--IDF is a classical representation for information retrieval and text classification~\cite{manning2008}. Although transformer embeddings can capture deeper semantics, TF--IDF remains transparent, computationally efficient, and strong for sparse high-dimensional text. Linear classifiers are also effective for large multi-class text problems because they scale well and provide class scores suitable for top-$k$ ranking.
+
+For document grouping, $k$-means is a standard baseline for clustering TF--IDF vectors~\cite{steinbach2000}. It is simple to inspect because each cluster can be summarized with high-weight centroid terms and representative documents.
+
+\section{Data and Preprocessing}
+The dataset contains computer science publication records. The relational schema is centered on \texttt{AcademicRecord}; related tables provide abstracts, publication names, author keywords, Keyword Plus terms, and Web of Science subject categories.
+
+The following entities are used:
+
+\begin{itemize}
+    \item \texttt{AcademicRecord}: article metadata,
+    \item \texttt{AcademicRecordAbstract}: article abstracts,
+    \item \texttt{Publication}: journal labels,
+    \item \texttt{AcademicRecordKeyword}: author keywords,
+    \item \texttt{AcademicRecordKeywordPlus}: Keyword Plus terms,
+    \item \texttt{AcademicRecordSubject}: subject categories.
+\end{itemize}
+
+SQL joins and aggregation operations combine these tables into article-level rows. The preprocessing step removes HTML tags, decodes HTML entities, lowercases text, normalizes whitespace, filters incomplete records, and removes very short abstracts. Journals with fewer than five samples are filtered to support stratified evaluation.
+
+\section{Methodology}
+
+\subsection{Development Stages}
+The model development process is intentionally staged. Table~\ref{tab:pipeline} summarizes the main experiments.
+
+\begin{table}[htbp]
+\centering
+\caption{Project Pipeline and Experimental Purpose}
+\label{tab:pipeline}
+\begin{tabular}{lll}
+\toprule
+Step & Method & Purpose \\
+\midrule
+3 & TF--IDF + cosine similarity & First retrieval baseline \\
+4 & Abstract vs. title+abstract & Text representation comparison \\
+6 & Title+abstract vs. rich text & Metadata contribution check \\
+7 & TF--IDF + Logistic Regression & Supervised baseline \\
+8 & Multi-channel TF--IDF + SGD & Final recommendation model \\
+9 & TF--IDF + $k$-means & Topic clustering \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Journal Recommendation}
+Journal recommendation is formulated as a multi-class text classification and ranking problem. Each article is represented by textual channels, and the target label is the journal name.
+
+The final model uses four channels: title, abstract, keywords/Keyword Plus, and subjects. Each channel has a separate TF--IDF vectorizer. The resulting sparse features are combined with a \texttt{ColumnTransformer} and passed to an \texttt{SGDClassifier} trained with logistic loss. The classifier produces probabilities for journal classes, and the system returns the five journals with the highest scores.
+
+This design also supports abstract-only usage. In the user interface, title, keyword, and subject fields are optional. If the user provides only an abstract, the other channels are empty. This matches the assignment requirement while still allowing richer predictions when additional metadata is available.
+
+\subsection{Topic Clustering}
+For clustering, title, abstract, keywords, Keyword Plus terms, and subjects are combined into a rich text field. The text is vectorized with TF--IDF and clustered using $k$-means. The number of clusters is set to $k=10$ to produce an interpretable summary of broad computer science topic groups. Each cluster is interpreted using centroid terms and journal distributions.
+
+\section{Results}
+
+\subsection{Recommendation Performance}
+The final model is evaluated with a stratified 80/20 hold-out split. Top-1 accuracy checks whether the first predicted journal matches the true journal. Top-5 accuracy checks whether the true journal appears in the five highest-ranked predictions, which directly matches the assignment output. The saved Streamlit model is fit only on the training split, so the hold-out test records are not reused during final model serialization.
+
+\begin{table}[htbp]
+\centering
+\caption{Final Journal Recommendation Performance}
+\label{tab:performance}
+\begin{tabular}{lc}
+\toprule
+Metric & Value \\
+\midrule
+Filtered articles & 22,966 \\
+Journal classes & 406 \\
+Train samples & 18,372 \\
+Test samples & 4,594 \\
+Train Top-1 accuracy & 0.9994 \\
+Train Top-5 accuracy & 1.0000 \\
+Hold-out Top-1 accuracy & 0.7061 \\
+Hold-out Top-5 accuracy & 0.9323 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The model achieves strong top-5 performance across a large number of journal classes. This is the most relevant metric because the required output is a ranked list of five candidate journals, not a single mandatory label.
+
+\subsection{Prototype and Clusters}
+The Streamlit prototype demonstrates the recommendation workflow and cluster exploration. The journal recommender tab accepts an abstract and optional title, keyword, and subject fields. The topic cluster tab displays cluster names, representative terms, top journals, and sample article identifiers.
+
+\section{Discussion}
+The staged experiments make the final approach more defensible than using a single model directly. The cosine-similarity baseline shows that lexical similarity is a reasonable starting point. The rich-text experiments show why article metadata can improve venue matching. The final supervised model then turns the problem into a probability-ranked multi-class journal recommendation task.
+
+There are also limitations. First, the final model is trained with enriched metadata, while a real user may provide only an abstract. This creates a possible train--serve mismatch. The project addresses this by keeping optional metadata fields in the interface and by documenting abstract-only baselines. Second, TF--IDF relies on lexical overlap and may miss deeper semantic similarity. Third, $k$-means requires choosing a fixed number of clusters; future work could compare multiple $k$ values with silhouette or elbow analysis.
+
+\section{Conclusion}
+This project implements a complete journal finder and topic clustering system for computer science articles. It builds an enriched dataset from relational tables, evaluates baseline representations, trains a multi-channel TF--IDF recommendation model, returns top-5 journal candidates for a user abstract, and generates interpretable topic clusters. The final top-5 accuracy of 0.9323 shows that classical and interpretable data mining methods can produce a practical solution for the assignment.
+
+\section*{Acknowledgment}
+This work was prepared as the final project for the Introduction to Data Mining course. The dataset and project specification were provided by the course instructor.
+
+\section*{Project Files}
+The full source code, notebook, report source, and project documentation are included in the submitted project repository: \url{https://github.com/walterbishop67/data_mining_hw2.git}.
+
+\begin{thebibliography}{99}
+
+\bibitem{coursehw}
+Course handout, ``Data Mining Final Project,'' specification document, 2026.
+
+\bibitem{khadka2025}
+A. Khadka and S. Sthapit, ``A review on scholarly publication recommender systems: Features, approaches, evaluation, and open research directions,'' \emph{Informatics}, vol.~12, no.~4, art.~108, 2025.
+
+\bibitem{mumtaz2022}
+M. Mumtaz, Z. Mumtaz, M. Z. Asghar, and F. A. Khan, ``Scientific paper recommendation systems: A literature review of recent publications,'' \emph{arXiv preprint} arXiv:2201.00682, 2022.
+
+\bibitem{zhang2023}
+Z. Zhang \emph{et al.}, ``Scholarly recommendation systems: A literature survey,'' \emph{Knowledge and Information Systems}, vol.~65, pp.~4433--4478, 2023.
+
+\bibitem{manning2008}
+C. D. Manning, P. Raghavan, and H. Schutze, \emph{Introduction to Information Retrieval}. Cambridge University Press, 2008.
+
+\bibitem{pedregosa2011}
+F. Pedregosa \emph{et al.}, ``Scikit-learn: Machine learning in Python,'' \emph{Journal of Machine Learning Research}, vol.~12, pp.~2825--2830, 2011.
+
+\bibitem{steinbach2000}
+M. Steinbach, G. Karypis, and V. Kumar, ``A comparison of document clustering techniques,'' in \emph{Proc. KDD Workshop on Text Mining}, 2000.
+
+\end{thebibliography}
+
+\end{document}

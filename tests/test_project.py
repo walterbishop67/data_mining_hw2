@@ -2,6 +2,18 @@ import unittest
 from pathlib import Path
 
 from src.data_loader import load_dataset, summarize_dataset
+from src.final_project.clustering import load_clustered_data
+from src.final_project.paths import (
+    CLUSTERED_DATASET_PATH,
+    DB_PATH as FINAL_PROJECT_DB_PATH,
+    PIPELINE_PATH,
+)
+from src.final_project.recommender_model import (
+    load_metadata,
+    load_pipeline,
+    _patch_sklearn_private_validation_helpers,
+    recommend_journals as recommend_saved_journals,
+)
 from src.modeling import cluster_topics, train_vectorizer
 from src.recommender import format_recommendations, recommend_journals
 from src.text_preprocessing import clean_text
@@ -78,6 +90,62 @@ class JournalFinderProjectTests(unittest.TestCase):
         self.assertEqual(len(clusters), 4)
         self.assertTrue((clusters["article_count"] > 0).all())
         self.assertTrue(clusters["top_terms"].str.len().gt(0).all())
+
+    def test_final_project_paths_match_project_layout(self):
+        self.assertEqual(FINAL_PROJECT_DB_PATH, DB_PATH)
+        self.assertTrue(FINAL_PROJECT_DB_PATH.is_file())
+        self.assertTrue(PIPELINE_PATH.is_file())
+        self.assertTrue(CLUSTERED_DATASET_PATH.is_file())
+
+    def test_saved_final_recommender_returns_top_five(self):
+        pipeline = load_pipeline()
+        result = recommend_saved_journals(
+            pipeline,
+            abstract=(
+                "This study proposes a graph neural network model for mining "
+                "software repository data and predicting source code defects."
+            ),
+            title="Graph neural networks for software defect prediction",
+            keywords="software mining, defect prediction, graph neural networks",
+            subjects="Artificial Intelligence, Software Engineering",
+            top_k=5,
+        )
+
+        self.assertEqual(len(result), 5)
+        self.assertEqual(result["rank"].tolist(), [1, 2, 3, 4, 5])
+        self.assertTrue(result["score"].is_monotonic_decreasing)
+        self.assertTrue(result["journal"].notna().all())
+
+    def test_saved_final_recommender_uses_clean_holdout_split(self):
+        metadata = load_metadata()
+
+        self.assertEqual(metadata["split_strategy"], "stratified_train_test_split")
+        self.assertEqual(metadata["saved_model_fit_scope"], "train_split_only")
+        self.assertGreaterEqual(metadata["holdout_top1_accuracy"], 0.70)
+        self.assertGreaterEqual(metadata["holdout_top5_accuracy"], 0.93)
+
+    def test_sklearn_validation_compatibility_patch(self):
+        import sklearn.utils.validation as validation
+
+        original = getattr(validation, "_is_pandas_df", None)
+        if original is not None:
+            delattr(validation, "_is_pandas_df")
+        try:
+            _patch_sklearn_private_validation_helpers()
+
+            self.assertTrue(hasattr(validation, "_is_pandas_df"))
+            self.assertTrue(validation._is_pandas_df(self.frame.head(1)))
+        finally:
+            if original is not None:
+                validation._is_pandas_df = original
+
+    def test_saved_topic_cluster_artifact_loads(self):
+        cluster_frame = load_clustered_data()
+
+        self.assertFalse(cluster_frame.empty)
+        required_columns = {"AcademicRecordID", "JournalName", "cluster"}
+        self.assertTrue(required_columns.issubset(cluster_frame.columns))
+        self.assertGreaterEqual(cluster_frame["cluster"].nunique(), 2)
 
 
 if __name__ == "__main__":
